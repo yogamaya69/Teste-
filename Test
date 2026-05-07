@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Fila de Atendimento</title>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom scrollbar for table if needed on very small screens */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+
+        /* Tab styling trick to make it look like a connected folder */
+        .tab-active {
+            position: relative;
+            z-index: 10;
+            border-bottom-color: transparent !important;
+        }
+        .tab-active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background-color: #f8fafc; /* matches bg-slate-50 */
+        }
+    </style>
+</head>
+<body class="bg-[#0a0a0a] min-h-screen font-sans text-slate-800 flex flex-col items-center justify-center p-4 sm:p-8">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2"></div>
+
+    <main class="w-full max-w-4xl flex flex-col gap-6">
+        
+        <!-- Top Section: Tabs + Main Card -->
+        <div class="flex flex-col">
+            <!-- Tabs -->
+            <nav class="flex w-full overflow-x-auto sm:overflow-visible">
+                <button onclick="switchTab('fila')" id="tab-fila" class="tab-active flex-1 bg-slate-50 text-slate-800 font-semibold py-4 px-2 sm:px-4 rounded-t-xl transition-all flex items-center justify-center gap-2 shadow-sm whitespace-nowrap">
+                    <i class="fa-solid fa-users text-slate-500"></i>
+                    FILA
+                </button>
+                <button onclick="switchTab('orcamento')" id="tab-orcamento" class="flex-1 bg-gray-400 text-gray-700 hover:bg-gray-300 hover:text-slate-800 font-medium py-3 px-2 sm:px-4 mt-1 rounded-t-xl transition-all flex items-center justify-center gap-2 shadow-inner whitespace-nowrap">
+                    <i class="fa-solid fa-file-invoice-dollar opacity-70"></i>
+                    GESTÃO DE ORÇAMENTO
+                </button>
+                <button onclick="switchTab('desempenho')" id="tab-desempenho" class="flex-1 bg-gray-400 text-gray-700 hover:bg-gray-300 hover:text-slate-800 font-medium py-3 px-2 sm:px-4 mt-1 rounded-t-xl transition-all flex items-center justify-center gap-2 shadow-inner whitespace-nowrap">
+                    <i class="fa-solid fa-chart-line opacity-70"></i>
+                    DESEMPENHO
+                </button>
+            </nav>
+
+            <!-- Main Card Content (FILA) -->
+            <div id="content-fila" class="bg-slate-50 rounded-b-2xl shadow-2xl p-8 sm:p-12 relative z-0 flex flex-col items-center border border-slate-200/50">
+                
+                <!-- Position Circle -->
+                <div class="relative mt-4">
+                    <!-- Outer glowing effect -->
+                    <div class="absolute inset-0 rounded-full bg-slate-200 animate-pulse-slow scale-110 opacity-50"></div>
+                    <!-- Main Circle -->
+                    <div class="relative w-40 h-40 sm:w-48 sm:h-48 rounded-full border-[6px] border-slate-800 flex items-center justify-center bg-white shadow-inner">
+                        <span class="text-7xl sm:text-8xl font-light text-slate-800 leading-none" style="font-family: 'Inter', sans-serif;">4</span>
+                    </div>
+                </div>
+                
+                <h2 class="mt-5 text-lg sm:text-xl text-slate-600 font-medium text-center">Sua posição na fila</h2>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 mt-10 w-full justify-center">
+                    <button onclick="showToast('Atendimento registrado com sucesso!', 'success')" class="flex items-center justify-center gap-3 bg-[#44b564] hover:bg-[#2e8245] text-white py-4 rounded-xl shadow-lg shadow-green-500/20 transition-colors duration-200 active:bg-[#256a38] w-full sm:w-72">
+                        <i class="fa-solid fa-check text-lg"></i>
+                        <span class="font-semibold tracking-wide">REGISTRAR ATENDIMENTO</span>
+                    </button>
+                    
+                    <button onclick="showToast('Você saiu da fila.', 'error')" class="flex items-center justify-center gap-3 bg-[#d94848] hover:bg-[#a63030] text-white py-4 rounded-xl shadow-lg shadow-red-500/20 transition-colors duration-200 active:bg-[#852525] w-full sm:w-72">
+                        <i class="fa-solid fa-arrow-right-from-bracket text-lg"></i>
+                        <span class="font-semibold tracking-wide">SAIR DA FILA</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Empty states for other tabs -->
+            <div id="content-orcamento" class="hidden bg-slate-50 rounded-b-2xl shadow-2xl p-12 text-center relative z-0 border border-slate-200/50">
+                <i class="fa-solid fa-file-invoice-dollar text-6xl text-slate-300 mb-4"></i>
+                <h2 class="text-2xl text-slate-600 font-medium">Gestão de Orçamento</h2>
+                <p class="text-slate-400 mt-2">Módulo em desenvolvimento.</p>
+            </div>
+            
+            <div id="content-desempenho" class="hidden bg-slate-50 rounded-b-2xl shadow-2xl p-12 text-center relative z-0 border border-slate-200/50">
+                <i class="fa-solid fa-chart-line text-6xl text-slate-300 mb-4"></i>
+                <h2 class="text-2xl text-slate-600 font-medium">Desempenho</h2>
+                <p class="text-slate-400 mt-2">Módulo em desenvolvimento.</p>
+            </div>
+        </div>
+
+        <!-- Bottom Section: Queue Table -->
+        <div class="bg-slate-50 rounded-2xl shadow-2xl overflow-hidden border border-slate-200/50 flex flex-col">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[600px]">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-500 text-sm uppercase tracking-wider">
+                            <th class="py-4 px-6 font-semibold w-24">Posição</th>
+                            <th class="py-4 px-6 font-semibold">Nome</th>
+                            <th class="py-4 px-6 font-semibold text-right">Tempo de Espera</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-slate-700">
+                        <!-- Row 1 -->
+                        <tr class="border-b border-slate-100 hover:bg-slate-100/80 transition-colors cursor-default">
+                            <td class="py-4 px-6 font-medium text-slate-500">06</td>
+                            <td class="py-4 px-6 flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">AT</div>
+                                Atendimento Técnico
+                            </td>
+                            <td class="py-4 px-6 text-right font-medium text-amber-600">
+                                <i class="fa-regular fa-clock mr-1"></i> 18 min
+                            </td>
+                        </tr>
+                        <!-- Row 2 -->
+                        <tr class="bg-slate-50/50 hover:bg-slate-100/80 transition-colors cursor-default">
+                            <td class="py-4 px-6 font-medium text-slate-500">07</td>
+                            <td class="py-4 px-6 flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">JS</div>
+                                João Silva
+                            </td>
+                            <td class="py-4 px-6 text-right font-medium text-amber-600">
+                                <i class="fa-regular fa-clock mr-1"></i> 18 min
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Footer Notification Text -->
+        <div class="text-center mt-4">
+            <p class="text-white/80 font-medium tracking-wide uppercase text-sm flex items-center justify-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                Olá, João! Você está na fila de atendimento
+            </p>
+        </div>
+
+    </main>
+
+    <!-- Interactivity Script -->
+    <script>
+        // Tab Switching Logic
+        function switchTab(tabName) {
+            const tabs = ['fila', 'orcamento', 'desempenho'];
+            
+            tabs.forEach(t => {
+                // Update buttons
+                const btn = document.getElementById(`tab-${t}`);
+                const content = document.getElementById(`content-${t}`);
+                
+                if (t === tabName) {
+                    btn.className = "tab-active flex-1 bg-slate-50 text-slate-800 font-semibold py-4 px-2 sm:px-4 rounded-t-xl transition-all flex items-center justify-center gap-2 shadow-sm whitespace-nowrap";
+                    content.classList.remove('hidden');
+                    content.classList.add('flex');
+                    if(t !== 'fila') content.classList.replace('flex', 'block'); // Adjust display for empty states
+                } else {
+                    btn.className = "flex-1 bg-gray-400 text-gray-700 hover:bg-gray-300 hover:text-slate-800 font-medium py-3 px-2 sm:px-4 mt-1 rounded-t-xl transition-all flex items-center justify-center gap-2 shadow-inner whitespace-nowrap";
+                    content.classList.add('hidden');
+                    content.classList.remove('flex', 'block');
+                }
+            });
+        }
+
+        // Toast Notification Logic
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            
+            const toast = document.createElement('div');
+            
+            // Base styles for toast
+            let baseStyles = "flex items-center gap-3 px-6 py-4 rounded-lg shadow-2xl transform transition-all duration-300 translate-x-full opacity-0 max-w-sm";
+            
+            // Icon and colors based on type
+            let icon = '';
+            if (type === 'success') {
+                toast.className = `${baseStyles} bg-white border-l-4 border-green-500 text-slate-800`;
+                icon = '<i class="fa-solid fa-circle-check text-green-500 text-xl"></i>';
+            } else if (type === 'error') {
+                toast.className = `${baseStyles} bg-white border-l-4 border-red-500 text-slate-800`;
+                icon = '<i class="fa-solid fa-circle-exclamation text-red-500 text-xl"></i>';
+            }
+
+            toast.innerHTML = `
+                ${icon}
+                <span class="font-medium">${message}</span>
+            `;
+
+            container.appendChild(toast);
+
+            // Trigger animation in
+            setTimeout(() => {
+                toast.classList.remove('translate-x-full', 'opacity-0');
+                toast.classList.add('translate-x-0', 'opacity-100');
+            }, 10);
+
+            // Remove after 3 seconds
+            setTimeout(() => {
+                toast.classList.remove('translate-x-0', 'opacity-100');
+                toast.classList.add('translate-x-full', 'opacity-0');
+                
+                // Remove element from DOM after animation
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
