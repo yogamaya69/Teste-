@@ -1,255 +1,425 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Fila de Atendimento</title>
-    
-    <!-- Google Fonts: Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- FontAwesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bloopy Mystery Dumpling | Em Breve</title>
+  <!-- Importando fontes divertidas e arredondadas do Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@600;800&display=swap" rel="stylesheet">
 
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                    animation: {
-                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                    }
-                }
-            }
-        }
-    </script>
+  <style>
+    :root {
+      /* Cores do Dumpling Amarelo (Base) */
+      --yellow-light: #ffe38a;
+      --yellow-main: #ffd35b;
+      --yellow-dark: #ffad19;
+      --brown-stroke: #9c5a00;
 
-    <style>
-        /* Custom scrollbar for table if needed on very small screens */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1; 
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1; 
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8; 
-        }
+      /* Cores do Dumpling Roxo */
+      --purple-light: #f0aaff;
+      --purple-main: #e080ff;
+      --purple-dark: #c050ff;
+      --purple-stroke: #6a008f;
 
-        /* Tab styling trick to make it look like a connected folder */
-        .tab-active {
-            position: relative;
-            z-index: 10;
-            border-bottom-color: transparent !important;
-        }
-        .tab-active::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background-color: #f8fafc; /* matches bg-slate-50 */
-        }
-    </style>
+      /* Cores do Dumpling Verde */
+      --green-light: #aaffaa;
+      --green-main: #80ff80;
+      --green-dark: #50dd50;
+      --green-stroke: #008f00;
+
+      /* Cores Gerais */
+      --cheek-pink: #ff8fb3;
+      --eye-dark: #1d1d1d;
+      --text-dark: #3b2b1f;
+      --logo-bloopy: #5e3a8c; /* Cor roxa do logo superior */
+
+       /* Cores do Arco-íris (Baseado na imagem) */
+      --rb-purple: #a855f7;
+      --rb-blue: #3b82f6;
+      --rb-cyan: #06b6d4;
+      --rb-green: #22c55e;
+      --rb-yellow: #eab308;
+      --rb-red: #ef4444;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: 'Nunito', sans-serif;
+      /* Fundo de céu com nuvens suaves na parte inferior */
+      background:
+        radial-gradient(ellipse at center bottom, rgba(255, 255, 255, 0.7) 0%, transparent 50%),
+        radial-gradient(ellipse at right bottom, rgba(230, 200, 255, 0.5) 10%, transparent 40%),
+        linear-gradient(to bottom, #87ceeb 0%, #bfe9ff 60%, #e0f7ff 100%);
+      color: var(--text-dark);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow-x: hidden; /* Essencial para o arco-íris gigante não criar rolagem lateral */
+    }
+
+    /* --- Arco-íris de Fundo --- */
+    .rainbow-path {
+      position: absolute;
+      width: 180vw; /* Muito largo para criar a curva suave */
+      height: 180vw;
+      border-radius: 50%;
+      top: -40%;
+      left: -40%;
+      transform: rotate(-25deg);
+      z-index: 1;
+      /* Gradiente linear com paradas bruscas para simular as faixas */
+      background: linear-gradient(
+        to right,
+        var(--rb-purple) 0% 16%,
+        var(--rb-blue) 16% 32%,
+        var(--rb-cyan) 32% 48%,
+        var(--rb-green) 48% 64%,
+        var(--rb-yellow) 64% 80%,
+        var(--rb-red) 80% 100%
+      );
+      box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+    }
+
+    /* --- Layout Principal --- */
+    .main-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px 40px;
+      position: relative;
+      z-index: 10; /* Conteúdo acima do arco-íris */
+    }
+
+    .content-area {
+      max-width: 550px;
+      padding-top: 60px;
+    }
+
+    .visuals-area {
+      position: relative;
+      width: 500px;
+      height: 500px;
+      /* border: 1px solid red; Para debug de posicionamento */
+    }
+
+    /* --- Logo Superior Direito (Bloopy) --- */
+    .top-logo {
+      position: absolute;
+      top: 30px;
+      right: 40px;
+      text-align: right;
+      z-index: 20;
+      color: var(--logo-bloopy);
+    }
+    .top-logo .bloopy-text {
+      font-family: 'Fredoka One', cursive;
+      font-size: 38px;
+      line-height: 1;
+      display: block;
+      text-shadow: 2px 2px 0px #ffffff;
+    }
+    .top-logo .sub-text {
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      background: #fff;
+      padding: 2px 8px;
+      border-radius: 12px;
+      display: inline-block;
+      margin-top: 5px;
+    }
+
+    /* --- Logo Principal (Mystery Dumpling) --- */
+    .main-logo {
+      margin-bottom: 30px;
+      line-height: 0.9;
+      user-select: none;
+      transform: rotate(-3deg);
+    }
+
+    .main-logo span {
+      display: block;
+      font-family: 'Fredoka One', cursive;
+      text-transform: uppercase;
+      /* Bordas grossas tipo cartoon */
+      -webkit-text-stroke: 2px #000;
+      filter: drop-shadow(0px 5px 0px rgba(0,0,0,0.2));
+    }
+
+    .main-logo .mystery {
+      font-size: clamp(60px, 10vw, 100px);
+      color: #ffffff;
+      letter-spacing: -2px;
+      text-shadow: 3px 3px 0 #e7c06a; /* Sombra interna amarelada */
+      position: relative;
+      left: -20px; /* Leve deslocamento para a esquerda como na imagem */
+    }
+
+    .main-logo .dumpling {
+      font-size: clamp(50px, 8vw, 80px);
+      color: var(--yellow-main);
+      letter-spacing: -1px;
+      text-shadow: 3px 3px 0 #c87800; /* Sombra interna alaranjada */
+    }
+
+    /* --- Textos --- */
+    h1.status-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(24px, 4vw, 36px);
+      color: var(--logo-bloopy);
+      margin-bottom: 16px;
+      text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+    }
+
+    p.description {
+      font-size: 18px;
+      line-height: 1.6;
+      font-weight: 600;
+      color: var(--text-dark);
+      background: rgba(255, 255, 255, 0.6); /* Fundo semi-transparente para leitura */
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+
+    .highlight {
+      color: var(--purple-dark);
+      font-weight: 800;
+    }
+
+    .cta-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--yellow-main);
+      color: #3b2600;
+      padding: 12px 24px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 18px;
+      box-shadow:
+        0 4px 0 var(--yellow-dark),
+        0 10px 20px rgba(0,0,0,0.15);
+      margin-top: 25px;
+      transition: transform 0.2s;
+    }
+    .cta-badge:hover {
+        transform: translateY(-2px);
+    }
+
+    /* --- O Boneco Dumpling (Componente CSS) --- */
+    .dumpling-character {
+      width: 150px;
+      height: 120px;
+      /* O background será definido pelas variações */
+      border-radius: 55% 55% 48% 48%;
+      position: absolute; /* Posicionamento absoluto na área visual */
+      box-shadow:
+        inset -10px -10px 20px rgba(0, 0, 0, 0.15), /* Sombra interna */
+        inset 10px 10px 20px rgba(255, 255, 255, 0.4), /* Luz interna */
+        0 15px 25px rgba(0, 0, 0, 0.2); /* Sombra projetada */
+      transition: transform 0.3s ease-in-out;
+    }
+    .dumpling-character:hover {
+        transform: scale(1.05) rotate(2deg);
+    }
+
+    /* Variação Roxa (Principal) */
+    .dumpling--purple {
+      background: linear-gradient(180deg, var(--purple-light) 0%, var(--purple-main) 100%);
+      bottom: 20px;
+      left: 50px;
+      width: 180px; /* Um pouco maior */
+      height: 150px;
+      z-index: 5;
+    }
+
+     /* Variação Verde */
+    .dumpling--green {
+      background: linear-gradient(180deg, var(--green-light) 0%, var(--green-main) 100%);
+      top: 100px;
+      right: 0px;
+      transform: rotate(15deg);
+    }
+    .dumpling--green .smile { border-color: var(--green-stroke); }
+
+
+    /* Variação Amarela (Topo) */
+    .dumpling--yellow {
+      background: linear-gradient(180deg, var(--yellow-light) 0%, var(--yellow-main) 100%);
+      top: -80px;
+      left: 80px;
+      width: 100px; /* Menor */
+      height: 85px;
+      transform: rotate(-10deg);
+    }
+    .dumpling--yellow .smile { border-color: var(--brown-stroke); }
+
+
+    /* Detalhes do Rosto (Comuns a todos) */
+    .dumpling-character::before { /* O "topinho" da massa */
+      content: "";
+      position: absolute;
+      top: -8px;
+      left: 50%;
+      width: 40%;
+      height: 25%;
+      transform: translateX(-50%);
+      border-radius: 50%;
+      background: inherit; /* Herda o gradiente do pai */
+      filter: brightness(1.1); /* Um pouco mais claro */
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .eye {
+      position: absolute;
+      top: 45%;
+      width: 16%;
+      height: 20%;
+      background: var(--eye-dark);
+      border-radius: 50%;
+    }
+    .eye::after { /* Brilho no olho */
+        content: '';
+        position: absolute;
+        top: 15%;
+        left: 15%;
+        width: 35%;
+        height: 35%;
+        background: white;
+        border-radius: 50%;
+    }
+
+    .eye.left { left: 25%; }
+    .eye.right { right: 25%; }
+
+    .smile {
+      position: absolute;
+      left: 50%;
+      top: 58%;
+      width: 20%;
+      height: 15%;
+      border-bottom: 4px solid var(--purple-stroke); /* Cor padrão */
+      border-radius: 0 0 30px 30px;
+      transform: translateX(-50%);
+    }
+
+    .cheek {
+      position: absolute;
+      top: 60%;
+      width: 18%;
+      height: 12%;
+      background: var(--cheek-pink);
+      border-radius: 50%;
+      opacity: 0.6;
+    }
+
+    .cheek.left { left: 12%; }
+    .cheek.right { right: 12%; }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 14px;
+      color: var(--logo-bloopy);
+      font-weight: 700;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* --- Responsividade --- */
+    @media (max-width: 900px) {
+      .main-container {
+        flex-direction: column;
+        text-align: center;
+      }
+      .content-area {
+        padding-top: 80px;
+        margin-bottom: 50px;
+      }
+      .visuals-area {
+        width: 100%;
+        height: 400px; /* Altura fixa para os dumplings em telas menores */
+      }
+      /* Ajusta posições dos dumplings para mobile */
+      .dumpling--purple { left: 50%; transform: translateX(-50%); bottom: 0; }
+      .dumpling--green { right: 10%; top: 50px; }
+      .dumpling--yellow { left: 10%; top: 20px; }
+      
+      .main-logo .mystery { left: 0; }
+    }
+
+    @media (max-width: 600px) {
+       .top-logo .bloopy-text { font-size: 28px; }
+       .rainbow-path { top: -20%; transform: rotate(-15deg); }
+    }
+  </style>
 </head>
-<body class="bg-[#0a0a0a] min-h-screen font-sans text-slate-800 flex flex-col items-center justify-center p-4 sm:p-8">
 
-    <!-- Toast Notification Container -->
-    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2"></div>
+<body>
+  <!-- Elemento decorativo do fundo -->
+  <div class="rainbow-path"></div>
 
-    <main class="w-full max-w-4xl flex flex-col gap-6">
-        
-        <!-- Top Section: Tabs + Main Card -->
-        <div class="flex flex-col">
-            <!-- Tabs -->
-            <nav class="flex w-full overflow-x-auto sm:overflow-visible">
-                <button onclick="switchTab('fila')" id="tab-fila" class="tab-active flex-1 bg-slate-50 text-slate-800 font-semibold py-4 px-2 sm:px-4 rounded-t-xl transition-all flex items-center justify-center gap-2 shadow-sm whitespace-nowrap">
-                    <i class="fa-solid fa-users text-slate-500"></i>
-                    FILA
-                </button>
-                <button onclick="switchTab('orcamento')" id="tab-orcamento" class="flex-1 bg-gray-400 text-gray-700 hover:bg-gray-300 hover:text-slate-800 font-medium py-3 px-2 sm:px-4 mt-1 rounded-t-xl transition-all flex items-center justify-center gap-2 shadow-inner whitespace-nowrap">
-                    <i class="fa-solid fa-file-invoice-dollar opacity-70"></i>
-                    GESTÃO DE ORÇAMENTO
-                </button>
-                <button onclick="switchTab('desempenho')" id="tab-desempenho" class="flex-1 bg-gray-400 text-gray-700 hover:bg-gray-300 hover:text-slate-800 font-medium py-3 px-2 sm:px-4 mt-1 rounded-t-xl transition-all flex items-center justify-center gap-2 shadow-inner whitespace-nowrap">
-                    <i class="fa-solid fa-chart-line opacity-70"></i>
-                    DESEMPENHO
-                </button>
-            </nav>
+  <!-- Logo Superior Direito -->
+  <div class="top-logo">
+    <span class="bloopy-text">Bloopy</span>
+    <span class="sub-text">Fun Squishy</span>
+  </div>
 
-            <!-- Main Card Content (FILA) -->
-            <div id="content-fila" class="bg-slate-50 rounded-b-2xl shadow-2xl p-8 sm:p-12 relative z-0 flex flex-col items-center border border-slate-200/50">
-                
-                <!-- Position Circle -->
-                <div class="relative mt-4">
-                    <!-- Outer glowing effect -->
-                    <div class="absolute inset-0 rounded-full bg-slate-200 animate-pulse-slow scale-110 opacity-50"></div>
-                    <!-- Main Circle -->
-                    <div class="relative w-40 h-40 sm:w-48 sm:h-48 rounded-full border-[6px] border-slate-800 flex items-center justify-center bg-white shadow-inner">
-                        <span class="text-7xl sm:text-8xl font-light text-slate-800 leading-none" style="font-family: 'Inter', sans-serif;">4</span>
-                    </div>
-                </div>
-                
-                <h2 class="mt-5 text-lg sm:text-xl text-slate-600 font-medium text-center">Sua posição na fila</h2>
+  <main class="main-container">
+    <!-- Área de Texto (Esquerda) -->
+    <div class="content-area">
+      <div class="main-logo" aria-label="Mystery Dumpling">
+        <span class="mystery">Mystery</span>
+        <span class="dumpling">Dumpling</span>
+      </div>
 
-                <!-- Action Buttons -->
-                <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 mt-10 w-full justify-center">
-                    <button onclick="showToast('Atendimento registrado com sucesso!', 'success')" class="flex items-center justify-center gap-3 bg-[#44b564] hover:bg-[#2e8245] text-white py-4 rounded-xl shadow-lg shadow-green-500/20 transition-colors duration-200 active:bg-[#256a38] w-full sm:w-72">
-                        <i class="fa-solid fa-check text-lg"></i>
-                        <span class="font-semibold tracking-wide">REGISTRAR ATENDIMENTO</span>
-                    </button>
-                    
-                    <button onclick="showToast('Você saiu da fila.', 'error')" class="flex items-center justify-center gap-3 bg-[#d94848] hover:bg-[#a63030] text-white py-4 rounded-xl shadow-lg shadow-red-500/20 transition-colors duration-200 active:bg-[#852525] w-full sm:w-72">
-                        <i class="fa-solid fa-arrow-right-from-bracket text-lg"></i>
-                        <span class="font-semibold tracking-wide">SAIR DA FILA</span>
-                    </button>
-                </div>
-            </div>
+      <h1 class="status-title">Estamos preparando a fofura!</h1>
 
-            <!-- Empty states for other tabs -->
-            <div id="content-orcamento" class="hidden bg-slate-50 rounded-b-2xl shadow-2xl p-12 text-center relative z-0 border border-slate-200/50">
-                <i class="fa-solid fa-file-invoice-dollar text-6xl text-slate-300 mb-4"></i>
-                <h2 class="text-2xl text-slate-600 font-medium">Gestão de Orçamento</h2>
-                <p class="text-slate-400 mt-2">Módulo em desenvolvimento.</p>
-            </div>
-            
-            <div id="content-desempenho" class="hidden bg-slate-50 rounded-b-2xl shadow-2xl p-12 text-center relative z-0 border border-slate-200/50">
-                <i class="fa-solid fa-chart-line text-6xl text-slate-300 mb-4"></i>
-                <h2 class="text-2xl text-slate-600 font-medium">Desempenho</h2>
-                <p class="text-slate-400 mt-2">Módulo em desenvolvimento.</p>
-            </div>
-        </div>
+      <p class="description">
+        O universo <strong>Bloopy</strong> está quase pronto para ser apertado! Estamos finalizando os detalhes para trazer a coleção mais surpreendente de <span class="highlight">Mystery Dumplings</span> para você. Prepare-se para descobrir qual será o seu!
+      </p>
 
-        <!-- Bottom Section: Queue Table -->
-        <div class="bg-slate-50 rounded-2xl shadow-2xl overflow-hidden border border-slate-200/50 flex flex-col">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse min-w-[600px]">
-                    <thead>
-                        <tr class="bg-slate-100 text-slate-500 text-sm uppercase tracking-wider">
-                            <th class="py-4 px-6 font-semibold w-24">Posição</th>
-                            <th class="py-4 px-6 font-semibold">Nome</th>
-                            <th class="py-4 px-6 font-semibold text-right">Tempo de Espera</th>
-                        </tr>
-                    </thead>
-                    <tbody class="text-slate-700">
-                        <!-- Row 1 -->
-                        <tr class="border-b border-slate-100 hover:bg-slate-100/80 transition-colors cursor-default">
-                            <td class="py-4 px-6 font-medium text-slate-500">06</td>
-                            <td class="py-4 px-6 flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">AT</div>
-                                Atendimento Técnico
-                            </td>
-                            <td class="py-4 px-6 text-right font-medium text-amber-600">
-                                <i class="fa-regular fa-clock mr-1"></i> 18 min
-                            </td>
-                        </tr>
-                        <!-- Row 2 -->
-                        <tr class="bg-slate-50/50 hover:bg-slate-100/80 transition-colors cursor-default">
-                            <td class="py-4 px-6 font-medium text-slate-500">07</td>
-                            <td class="py-4 px-6 flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">JS</div>
-                                João Silva
-                            </td>
-                            <td class="py-4 px-6 text-right font-medium text-amber-600">
-                                <i class="fa-regular fa-clock mr-1"></i> 18 min
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+      <div class="cta-badge">✨ Em breve nas lojas! 🥟</div>
+    </div>
 
-        <!-- Footer Notification Text -->
-        <div class="text-center mt-4">
-            <p class="text-white/80 font-medium tracking-wide uppercase text-sm flex items-center justify-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
-                Olá, João! Você está na fila de atendimento
-            </p>
-        </div>
+    <!-- Área Visual (Direita - Dumplings no Arco-íris) -->
+    <div class="visuals-area">
+      <!-- Dumpling Amarelo (Topo) -->
+      <div class="dumpling-character dumpling--yellow">
+        <span class="eye left"></span><span class="eye right"></span>
+        <span class="cheek left"></span><span class="cheek right"></span>
+        <span class="smile"></span>
+      </div>
 
-    </main>
+      <!-- Dumpling Verde (Meio) -->
+      <div class="dumpling-character dumpling--green">
+        <span class="eye left"></span><span class="eye right"></span>
+        <span class="cheek left"></span><span class="cheek right"></span>
+        <span class="smile"></span>
+      </div>
 
-    <!-- Interactivity Script -->
-    <script>
-        // Tab Switching Logic
-        function switchTab(tabName) {
-            const tabs = ['fila', 'orcamento', 'desempenho'];
-            
-            tabs.forEach(t => {
-                // Update buttons
-                const btn = document.getElementById(`tab-${t}`);
-                const content = document.getElementById(`content-${t}`);
-                
-                if (t === tabName) {
-                    btn.className = "tab-active flex-1 bg-slate-50 text-slate-800 font-semibold py-4 px-2 sm:px-4 rounded-t-xl transition-all flex items-center justify-center gap-2 shadow-sm whitespace-nowrap";
-                    content.classList.remove('hidden');
-                    content.classList.add('flex');
-                    if(t !== 'fila') content.classList.replace('flex', 'block'); // Adjust display for empty states
-                } else {
-                    btn.className = "flex-1 bg-gray-400 text-gray-700 hover:bg-gray-300 hover:text-slate-800 font-medium py-3 px-2 sm:px-4 mt-1 rounded-t-xl transition-all flex items-center justify-center gap-2 shadow-inner whitespace-nowrap";
-                    content.classList.add('hidden');
-                    content.classList.remove('flex', 'block');
-                }
-            });
-        }
+      <!-- Dumpling Roxo (Principal/Baixo) -->
+      <div class="dumpling-character dumpling--purple">
+        <span class="eye left"></span><span class="eye right"></span>
+        <span class="cheek left"></span><span class="cheek right"></span>
+        <span class="smile"></span>
+      </div>
+    </div>
+  </main>
 
-        // Toast Notification Logic
-        function showToast(message, type = 'success') {
-            const container = document.getElementById('toast-container');
-            
-            const toast = document.createElement('div');
-            
-            // Base styles for toast
-            let baseStyles = "flex items-center gap-3 px-6 py-4 rounded-lg shadow-2xl transform transition-all duration-300 translate-x-full opacity-0 max-w-sm";
-            
-            // Icon and colors based on type
-            let icon = '';
-            if (type === 'success') {
-                toast.className = `${baseStyles} bg-white border-l-4 border-green-500 text-slate-800`;
-                icon = '<i class="fa-solid fa-circle-check text-green-500 text-xl"></i>';
-            } else if (type === 'error') {
-                toast.className = `${baseStyles} bg-white border-l-4 border-red-500 text-slate-800`;
-                icon = '<i class="fa-solid fa-circle-exclamation text-red-500 text-xl"></i>';
-            }
-
-            toast.innerHTML = `
-                ${icon}
-                <span class="font-medium">${message}</span>
-            `;
-
-            container.appendChild(toast);
-
-            // Trigger animation in
-            setTimeout(() => {
-                toast.classList.remove('translate-x-full', 'opacity-0');
-                toast.classList.add('translate-x-0', 'opacity-100');
-            }, 10);
-
-            // Remove after 3 seconds
-            setTimeout(() => {
-                toast.classList.remove('translate-x-0', 'opacity-100');
-                toast.classList.add('translate-x-full', 'opacity-0');
-                
-                // Remove element from DOM after animation
-                setTimeout(() => {
-                    toast.remove();
-                }, 300);
-            }, 3000);
-        }
-    </script>
+  <footer>
+    © 2024 Bloopy Fun Squishy — Todos os direitos reservados.
+  </footer>
 </body>
 </html>
